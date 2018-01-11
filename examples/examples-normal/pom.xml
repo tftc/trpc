@@ -6,17 +6,17 @@
     <parent>
         <groupId>com.itiancai.trpc</groupId>
         <artifactId>examples</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>examples-server</artifactId>
-    <name>trpc-examples-server</name>
+    <artifactId>examples-normal</artifactId>
+    <name>trpc-examples-normal</name>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.itiancai.trpc</groupId>
             <artifactId>examples-api</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

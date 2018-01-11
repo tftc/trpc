@@ -1,8 +1,8 @@
 syntax = "proto3";
 //option java_multiple_files = true;
-option java_package = "com.quancheng.examples.model";
+option java_package = "com.itiancai.trpc.examples.model";
 option java_outer_classname = "Hello";
-package com.quancheng.examples.model;
+package com.itiancai.trpc.examples.model;
 
 // The request message containing the user's name.
 message HelloRequest {
@@ -21,10 +21,4 @@ enum PhoneType {
     MOBILE = 0;
     HOME = 1;
     WORK = 2;
-}
-
-message Project2 {
-    string id = 1;
-    Project pb = 2;
-    PhoneType pt = 3;
 }

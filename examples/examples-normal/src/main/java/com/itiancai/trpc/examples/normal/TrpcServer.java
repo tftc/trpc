@@ -1,9 +1,9 @@
-package com.itiancai.trpc.examples.server;
+package com.itiancai.trpc.examples.normal;
 
 import com.itiancai.trpc.core.grpc.server.GrpcServerStrategy;
-import com.quancheng.examples.model.HelloReply;
-import com.quancheng.examples.model.HelloRequest;
-import com.quancheng.examples.service.HelloService;
+import com.itiancai.trpc.examples.model.HelloReply;
+import com.itiancai.trpc.examples.model.HelloRequest;
+import com.itiancai.trpc.examples.service.HelloService;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;

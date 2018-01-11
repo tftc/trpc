@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.itiancai.trpc</groupId>
         <artifactId>compile</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>maven-trpc-plugin</artifactId>
     <name>trpc-compile-plugin-maven</name>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.itiancai.trpc</groupId>
             <artifactId>generator</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
