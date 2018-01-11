@@ -1,0 +1,39 @@
+delimiters "<", ">"
+import "generator/template/core.stg"
+
+service_compiler_enabled(service) ::= "true"
+service_compiler_output(service) ::= "<service.proto.javaPackagePath>/<service.javaName>.java"
+service_compiler_template(service) ::= "<service:service()>"
+
+service(service) ::= <<
+package <service.proto.javaPackage>;
+
+import com.itiancai.trpc.core.grpc.annotation.GrpcMethodType;
+
+import io.grpc.stub.StreamObserver;
+import io.grpc.MethodDescriptor;
+
+public interface <service.javaName> {
+
+  <service.methods:service_method_declaration(); separator="\n\n">
+
+}
+>>
+
+//unary, clientStreaming, serverStreaming, bidiStreaming
+
+service_method_declaration(method) ::= <<
+<if(method.unary)>
+@GrpcMethodType(methodType = MethodDescriptor.MethodType.UNARY, requestClass=<method.javaArgTypeFullName>.class, responseClass=<method.javaReturnTypeFullName>.class)
+<method.javaReturnTypeFullName> <method.javaName>(<method.javaArgTypeFullName> request);
+<elseif(method.serverStreaming)>
+@GrpcMethodType(methodType = MethodDescriptor.MethodType.SERVER_STREAMING, requestClass=<method.javaArgTypeFullName>.class, responseClass=<method.javaReturnTypeFullName>.class)
+void <method.javaName>(<method.javaArgTypeFullName> request, StreamObserver\<<method.javaReturnTypeFullName>\> response);
+<elseif(method.clientStreaming)>
+@GrpcMethodType(methodType = MethodDescriptor.MethodType.CLIENT_STREAMING, requestClass=<method.javaArgTypeFullName>.class, responseClass=<method.javaReturnTypeFullName>.class)
+StreamObserver\<<method.javaArgTypeFullName>\> <method.javaName>(<method.javaReturnTypeFullName> response);
+<else>
+@GrpcMethodType(methodType = MethodDescriptor.MethodType.BIDI_STREAMING, requestClass=<method.javaArgTypeFullName>.class, responseClass=<method.javaReturnTypeFullName>.class)
+StreamObserver\<<method.javaArgTypeFullName>\> <method.javaName>(StreamObserver\<<method.javaReturnTypeFullName>\> response);
+<endif>
+>>

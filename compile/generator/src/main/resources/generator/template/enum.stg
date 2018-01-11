@@ -1,0 +1,33 @@
+delimiters "<", ">"
+
+enum(enum) ::= <<
+package <enum.proto.javaPackage>;
+
+import com.baidu.bjf.remoting.protobuf.EnumReadable;
+
+<enum:enum_body()>
+>>
+
+enum_body(enum) ::= <<
+
+public enum <enum.javaName> implements EnumReadable {
+
+  <enum.constants:enum_constant(); separator=",\n"><if(first(enum.constants))>,<endif>
+  UNRECOGNIZED(-1);
+
+  private final int value;
+
+  private <enum.javaName>(int n) {
+    this.value = n;
+  }
+
+  @Override
+  public int value() {
+    return value;
+  }
+}
+>>
+
+enum_constant(constant) ::= <<
+<constant.javaName>(<constant.value>)
+>>

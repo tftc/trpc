@@ -1,0 +1,38 @@
+delimiters "<", ">"
+
+message(message) ::= <<
+package <message.proto.javaPackage>;
+
+import com.baidu.bjf.remoting.protobuf.FieldType;
+import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
+
+import lombok.Data;
+
+<message:message_body()>
+>>
+
+message_body(message) ::= <<
+<if(message.isMapEntry)>
+<else>
+@Data
+public <if(message.nested)>static <endif>final class <message.javaName> {
+  <message.fields:field_declaration(); separator="\n">
+
+  <message.messages:message_body(); separator="\n">
+}
+<endif>
+>>
+
+field_declaration(field) ::= <<
+@Protobuf(fieldType = FieldType.<field.javaProtobuf.fieldType>, required = <field.javaProtobuf.required>, order = <field.javaProtobuf.order>)
+<if(field.oneofPart)>
+<elseif(field.map)>
+private <field.javaMapType> <field.javaName>;
+<elseif(field.repeated)>
+private <field.javaRepeatedType> <field.javaName>;
+<elseif(field.isBytes)>
+private byte[] <field.javaName>;
+<else>
+private <field.javaType> <field.javaName>;
+<endif>
+>>

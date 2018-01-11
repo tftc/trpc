@@ -1,0 +1,23 @@
+// delimiters must be explicitly set for each file
+// otherwise stringtemplate engine uses delimiters that are defined
+// in the file where template is called
+// TODO: create defect for stringtemplate
+delimiters "<", ">"
+
+module_compiler_enabled(module) ::= "false"
+proto_compiler_enabled(proto) ::= "false"
+message_compiler_enabled(message) ::= "false"
+enum_compiler_enabled(enum) ::= "false"
+service_compiler_enabled(service) ::= "false"
+
+module_compiler_output(module) ::= ""
+proto_compiler_output(proto) ::= ""
+message_compiler_output(message) ::= ""
+enum_compiler_output(enum) ::= ""
+service_compiler_output(service) ::= ""
+
+module_compiler_template(module) ::= ""
+proto_compiler_template(proto) ::= ""
+message_compiler_template(message) ::= ""
+enum_compiler_template(enum) ::= ""
+service_compiler_template(service) ::= ""

@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package com.itiancai.examples.model;
+
+enum Sex {
+    F = 0;
+    M = 1;
+}
+
+message Idcard {
+    string cardNo = 1;
+}
+
+message User {
+    int64 id = 1;
+    string name = 2;
+    Idcard idcard = 3;
+
+    // map entry message should not be present in index
+    map<int32, int32> map = 4;
+
+    Sex sex = 5;
+
+    bytes headImg = 6;
+
+    repeated int32 roleIds = 7;
+
+    double amount = 8;
+
+    float f = 9;
+
+    bool flag = 10;
+
+    message D {
+
+    }
+}
+
+message Request {
+    User user = 1;
+}
+
+message Response {
+    string res = 1;
+}

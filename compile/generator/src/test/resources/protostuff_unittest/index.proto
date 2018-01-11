@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package protostuff_unittest;
+
+service Service {
+    rpc call (A) returns (B);
+
+    rpc call1 (A) returns (stream B);
+
+    rpc call2 (stream A) returns (B);
+
+    rpc call3 (stream A) returns (stream B);
+}
+
+message A {
+}
+
+message B {
+}
+
+enum E {
+    X = 0;
+}
+
+message C {
+    A a = 1;
+    B b = 2;
+
+    // map entry message should not be present in index
+    map<int32, int32> map = 3;
+
+    E e = 4;
+
+    repeated E el = 5;
+
+    int64 i64 = 6;
+
+    int32 i32 = 7;
+
+    uint32 ui32 = 8;
+
+    bytes bs = 9;
+
+    message D {
+
+    }
+}

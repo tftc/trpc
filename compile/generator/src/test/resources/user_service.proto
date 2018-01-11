@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.itiancai.examples;
+
+import "user.proto";
+
+service UserService {
+    rpc call (com.itiancai.examples.model.Request) returns (com.itiancai.examples.model.Response);
+
+    rpc call1 (com.itiancai.examples.model.Request) returns (stream com.itiancai.examples.model.Response);
+
+    rpc call2 (stream com.itiancai.examples.model.Request) returns (com.itiancai.examples.model.Response);
+
+    rpc call3 (stream com.itiancai.examples.model.Request) returns (stream com.itiancai.examples.model.Response);
+}
