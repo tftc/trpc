@@ -6,17 +6,16 @@ package <message.proto.javaPackage>;
 import com.baidu.bjf.remoting.protobuf.FieldType;
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
 
-import lombok.Data;
-
 <message:message_body()>
 >>
 
 message_body(message) ::= <<
 <if(message.isMapEntry)>
 <else>
-@Data
 public <if(message.nested)>static <endif>final class <message.javaName> {
   <message.fields:field_declaration(); separator="\n">
+
+  <message.fields:field_accessors(); separator="\n">
 
   <message.messages:message_body(); separator="\n">
 }
@@ -34,5 +33,42 @@ private <field.javaRepeatedType> <field.javaName>;
 private byte[] <field.javaName>;
 <else>
 private <field.javaType> <field.javaName>;
+<endif>
+>>
+
+field_accessors(field) ::= <<
+<if(field.oneofPart)>
+<elseif(field.map)>
+public <field.javaMapType> <field.javaGetterName>() {
+    return this.<field.javaName>;
+}
+
+public void <field.javaSetterName>(<field.javaMapType> <field.javaName>) {
+    this.<field.javaName> = <field.javaName>;
+}
+<elseif(field.repeated)>
+public <field.javaRepeatedType> <field.javaGetterName>() {
+    return this.<field.javaName>;
+}
+
+public void <field.javaSetterName>(<field.javaRepeatedType> <field.javaName>) {
+    this.<field.javaName> = <field.javaName>;
+}
+<elseif(field.isBytes)>
+public byte[] <field.javaGetterName>() {
+    return this.<field.javaName>;
+}
+
+public void <field.javaSetterName>(byte[] <field.javaName>) {
+    this.<field.javaName> = <field.javaName>;
+}
+<else>
+public <field.javaType> <field.javaGetterName>() {
+    return this.<field.javaName>;
+}
+
+public void <field.javaSetterName>(<field.javaType> <field.javaName>) {
+    this.<field.javaName> = <field.javaName>;
+}
 <endif>
 >>
