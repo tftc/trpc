@@ -1,0 +1,4 @@
+# AutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.itiancai.trpc.springsupport.server.TrpcServerAutoConfiguration,\
+com.itiancai.trpc.springsupport.client.TrpcClientAutoConfiguration

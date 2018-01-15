@@ -16,10 +16,11 @@ public class TrpcServer {
     GrpcServerStrategy gss = new GrpcServerStrategy(HelloService.class, new HelloServiceImpl());
     ServerServiceDefinition ssd = gss.getServerDefintion();
 
-    Server server = ServerBuilder.forPort(50051)
+    Server server = ServerBuilder.forPort(9090)
             .addService(ssd)
             .build()
             .start();
+    System.out.println("started ...");
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
@@ -30,7 +31,6 @@ public class TrpcServer {
       }
     });
     server.awaitTermination();
-
   }
 
   public static class HelloServiceImpl implements HelloService {

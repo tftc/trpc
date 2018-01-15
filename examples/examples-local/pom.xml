@@ -8,8 +8,8 @@
         <artifactId>examples</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>examples-normal</artifactId>
-    <name>trpc-examples-normal</name>
+    <artifactId>examples-local</artifactId>
+    <name>trpc-examples-local</name>
     <packaging>jar</packaging>
 
     <dependencies>

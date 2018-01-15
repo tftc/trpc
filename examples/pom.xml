@@ -13,6 +13,8 @@
     <name>trpc-examples</name>
     <modules>
         <module>examples-api</module>
-        <module>examples-normal</module>
+        <module>examples-local</module>
+        <module>examples-spring-server</module>
+        <module>examples-spring-client</module>
     </modules>
 </project>

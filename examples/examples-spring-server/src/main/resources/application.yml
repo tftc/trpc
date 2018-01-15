@@ -1,0 +1,32 @@
+# eureka配置
+#spring:
+#  application:
+#    name: cloud-grpc-server
+#  sleuth:
+#    sampler:
+#      percentage: 1
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#  instance:
+#    instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+
+# consul配置
+#spring:
+#  application:
+#    name: cloud-trpc-server
+#  cloud:
+#    consul:
+#      host: localhost
+#      port: 8500
+#      discovery:
+#        instanceId:${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+
+server:
+  port: 0
+trpc:
+  server:
+    port: 9090

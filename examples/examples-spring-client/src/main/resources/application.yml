@@ -1,0 +1,15 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: trpc-spring-client
+
+trpc:
+  client:
+    hello:
+      host:
+        - 127.0.0.1
+      port:
+        - 9090
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
