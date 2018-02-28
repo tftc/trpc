@@ -15,7 +15,7 @@ import io.grpc.stub.AbstractStub;
 @Inherited
 public @interface TrpcClient {
 
-  String value();
+  String group();
 
   Class<?> clazz();
 }

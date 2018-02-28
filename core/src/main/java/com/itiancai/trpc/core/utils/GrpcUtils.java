@@ -18,7 +18,7 @@ public class GrpcUtils {
     Class<Resp> respClass = (Class<Resp>) grpcMethodType.responseClass();
     return io.grpc.MethodDescriptor.newBuilder()
             .setType(grpcMethodType.methodType())//
-            .setFullMethodName(io.grpc.MethodDescriptor.generateFullMethodName(clazzName, methodName))//
+            .setFullMethodName(MethodDescriptor.generateFullMethodName(clazzName, methodName))//
             .setRequestMarshaller(buildMarshaller(reqClass))//
             .setResponseMarshaller(buildMarshaller(respClass))//
             .setSafe(false)//

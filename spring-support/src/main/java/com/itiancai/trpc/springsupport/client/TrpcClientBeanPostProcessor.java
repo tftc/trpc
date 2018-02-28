@@ -1,8 +1,8 @@
-package com.itiancai.trpc.springsupport.client.factory;
+package com.itiancai.trpc.springsupport.client;
 
 import com.google.common.collect.Maps;
 
-import com.itiancai.trpc.core.grpc.client.GrpcClientStrategy;
+import com.itiancai.trpc.core.grpc.GrpcEngine;
 import com.itiancai.trpc.springsupport.annotation.TrpcClient;
 
 import org.springframework.aop.framework.Advised;
@@ -17,9 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.grpc.Channel;
-import lombok.SneakyThrows;
-
 public class TrpcClientBeanPostProcessor implements org.springframework.beans.factory.config.BeanPostProcessor {
 
   private Map<String, List<Class>> beansToProcess = Maps.newHashMap();
@@ -27,7 +24,7 @@ public class TrpcClientBeanPostProcessor implements org.springframework.beans.fa
   private Map<String, Object> trpcClientMap = Maps.newHashMap();
 
   @Autowired
-  private GrpcChannelFactory channelFactory;
+  private GrpcEngine grpcEngine;
 
   public TrpcClientBeanPostProcessor() {
   }
@@ -68,25 +65,25 @@ public class TrpcClientBeanPostProcessor implements org.springframework.beans.fa
     return bean;
   }
 
-  @SneakyThrows
   private Object getTargetBean(Object bean) {
     Object target = bean;
     while (AopUtils.isAopProxy(target)) {
-      target = ((Advised) target).getTargetSource().getTarget();
+      try {
+        target = ((Advised) target).getTargetSource().getTarget();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
     return target;
   }
 
-  @SneakyThrows
   private Object getPrpcClient(TrpcClient annotation) {
     Object grpcClient;
-    if (trpcClientMap.containsKey(annotation.value())) {
-      grpcClient = trpcClientMap.get(annotation.value());
+    if (trpcClientMap.containsKey(annotation.group())) {
+      grpcClient = trpcClientMap.get(annotation.group());
     } else {
-      Channel channel = channelFactory.createChannel(annotation.value());
-      GrpcClientStrategy grpcClientStrategy = new GrpcClientStrategy(annotation.clazz(), channel);
-      grpcClient = grpcClientStrategy.getGrpcClient();
-      trpcClientMap.put(annotation.value(), grpcClient);
+      grpcClient = grpcEngine.createClient(annotation.group(), annotation.clazz());
+      trpcClientMap.put(annotation.group(), grpcClient);
     }
     return grpcClient;
   }

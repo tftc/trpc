@@ -1,23 +1,38 @@
-package com.itiancai.trpc.springsupport.server.factory;
+package com.itiancai.trpc.springsupport.server;
 
+import com.google.common.collect.Lists;
+
+import com.itiancai.trpc.core.grpc.GrpcEngine;
+import com.itiancai.trpc.core.grpc.annotation.ServiceDefinition;
+import com.itiancai.trpc.springsupport.annotation.TrpcService;
+
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.grpc.Server;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TrpcServerLifecycle implements SmartLifecycle {
+public class TrpcServerLifecycle implements SmartLifecycle, ApplicationContextAware {
+
+  private ApplicationContext applicationContext;
+
   private static AtomicInteger serverCounter = new AtomicInteger(-1);
 
   private volatile Server server;
   private volatile int phase = Integer.MAX_VALUE;
-  private final TrpcServerFactory factory;
+  private int port;
+  private GrpcEngine grpcEngine;
 
-  public TrpcServerLifecycle(TrpcServerFactory factory) {
-    this.factory = factory;
+  public TrpcServerLifecycle(GrpcEngine grpcEngine, TrpcServerProperties serverProperties) {
+    this.grpcEngine = grpcEngine;
+    this.port = serverProperties.getPort();
   }
 
   @Override
@@ -58,9 +73,9 @@ public class TrpcServerLifecycle implements SmartLifecycle {
   protected void createAndStartGrpcServer() throws IOException {
     Server localServer = this.server;
     if (localServer == null) {
-      this.server = this.factory.createServer();
+      this.server = grpcEngine.createServer(findTrpcServices(), port);
       this.server.start();
-      log.info("gRPC Server started, listening on address: " + this.factory.getAddress() + ", port: " + this.factory.getPort());
+      log.info("gRPC Server started, listening on address: " + ", port: " + this.port);
 
       Thread awaitThread = new Thread("container-" + (serverCounter.incrementAndGet())) {
 
@@ -88,4 +103,20 @@ public class TrpcServerLifecycle implements SmartLifecycle {
     }
   }
 
+  public List<ServiceDefinition> findTrpcServices() {
+    String[] beanNames = this.applicationContext.getBeanNamesForAnnotation(TrpcService.class);
+
+    List<ServiceDefinition> definitions = Lists.newArrayListWithCapacity(beanNames.length);
+    for (String beanName : beanNames) {
+      Object trpcService = this.applicationContext.getBean(beanName);
+      TrpcService serviceAnnotation = applicationContext.findAnnotationOnBean(beanName, TrpcService.class);
+      definitions.add(new ServiceDefinition(serviceAnnotation.value(), trpcService));
+    }
+    return definitions;
+  }
+
+  @Override
+  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    this.applicationContext = applicationContext;
+  }
 }

@@ -3,13 +3,19 @@ server:
 spring:
   application:
     name: trpc-spring-client
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        register: false
 
-trpc:
-  client:
-    hello:
-      host:
-        - 127.0.0.1
-      port:
-        - 9090
-      enableKeepAlive: true
-      keepAliveWithoutCalls: true
+#trpc:
+#  client:
+#    hello:
+#      host:
+#        - 127.0.0.1
+#      port:
+#        - 9090
+#      enableKeepAlive: true
+#      keepAliveWithoutCalls: true

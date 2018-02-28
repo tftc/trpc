@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GrpcClientController {
 
-  @TrpcClient(value = "hello", clazz = HelloService.class)
+  @TrpcClient(group = "cloud-trpc-server", clazz = HelloService.class)
   private HelloService helloService;
 
   @RequestMapping("/")

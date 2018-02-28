@@ -13,7 +13,7 @@ import io.grpc.ManagedChannelBuilder;
 public class TrpcClient {
 
   public static void main(String[] args) throws InterruptedException {
-    ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9090)
+    ManagedChannel channel = ManagedChannelBuilder.forAddress("192.168.101.138", 9090)
             .usePlaintext(true)
             .build();
     GrpcClientStrategy gcs = new GrpcClientStrategy(HelloService.class, channel);

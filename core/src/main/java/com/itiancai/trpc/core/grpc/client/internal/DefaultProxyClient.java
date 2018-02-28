@@ -15,6 +15,7 @@ public class DefaultProxyClient<T> implements GrpcProtocolClient {
     this.serviceClass = clazz;
   }
 
+  @Override
   public T getGrpcClient(Channel channel, int callType, int callTimeout) {
     return (T) Proxy.newProxyInstance(
             ClassHelper.getClassLoader(),

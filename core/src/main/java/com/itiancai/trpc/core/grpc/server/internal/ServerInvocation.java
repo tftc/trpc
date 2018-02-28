@@ -27,6 +27,11 @@ public class ServerInvocation<Req, Resp> implements io.grpc.stub.ServerCalls.Una
     grpcMethodType = method.getAnnotation(GrpcMethodType.class);
   }
 
+  /**
+   * StreamingRequestMethod
+   * @param responseObserver
+   * @return
+   */
   @Override
   public StreamObserver<Req> invoke(StreamObserver<Resp> responseObserver) {
     try {
@@ -39,6 +44,11 @@ public class ServerInvocation<Req, Resp> implements io.grpc.stub.ServerCalls.Una
     }
   }
 
+  /**
+   * UnaryRequestMethod
+   * @param request
+   * @param responseObserver
+   */
   @Override
   public void invoke(Req request, StreamObserver<Resp> responseObserver) {
     switch (grpcMethodType.methodType()) {
