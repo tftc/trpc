@@ -6,13 +6,18 @@ public class GrpcRequest<Req, Resp> {
 
   private MethodDescriptor<Req, Resp> methodDescriptor;
 
+  private Class<Req> requestClass;
+  private Class<Resp> responseClass;
+
   private Req requestParam;
 
   private int callType;
   private int callTimeOut;
 
-  public GrpcRequest(MethodDescriptor methodDescriptor, Req requestParam, int callType, int callTimeOut) {
+  public GrpcRequest(MethodDescriptor<Req, Resp> methodDescriptor, Class<Req> requestClass, Class<Resp> responseClass, Req requestParam, int callType, int callTimeOut) {
     this.methodDescriptor = methodDescriptor;
+    this.requestClass = requestClass;
+    this.responseClass = responseClass;
     this.requestParam = requestParam;
     this.callType = callType;
     this.callTimeOut = callTimeOut;
@@ -24,6 +29,22 @@ public class GrpcRequest<Req, Resp> {
 
   public void setMethodDescriptor(MethodDescriptor<Req, Resp> methodDescriptor) {
     this.methodDescriptor = methodDescriptor;
+  }
+
+  public Class<Req> getRequestClass() {
+    return requestClass;
+  }
+
+  public void setRequestClass(Class<Req> requestClass) {
+    this.requestClass = requestClass;
+  }
+
+  public Class<Resp> getResponseClass() {
+    return responseClass;
+  }
+
+  public void setResponseClass(Class<Resp> responseClass) {
+    this.responseClass = responseClass;
   }
 
   public Req getRequestParam() {

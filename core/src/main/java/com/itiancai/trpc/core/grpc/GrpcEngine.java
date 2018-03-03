@@ -2,6 +2,7 @@ package com.itiancai.trpc.core.grpc;
 
 import com.google.common.collect.Maps;
 
+import com.itiancai.trpc.core.grpc.annotation.ClientDefinition;
 import com.itiancai.trpc.core.grpc.annotation.ServiceDefinition;
 import com.itiancai.trpc.core.grpc.client.GrpcClientStrategy;
 import com.itiancai.trpc.core.grpc.client.resolver.GrpcNameResolverProvider;
@@ -30,8 +31,9 @@ public class GrpcEngine {
     this.registry = registry;
   }
 
-  public <T> T createClient(String group, Class<T> clazz) {
-      Channel channel = channelPool.get(group);
+  public <T> T createClient(ClientDefinition clientDefinition) {
+    String group = clientDefinition.getGroup();
+    Channel channel = channelPool.get(group);
     if (channel == null) {
       NettyChannelBuilder builder = NettyChannelBuilder.forTarget(group);
       if (registry != null) {
@@ -45,7 +47,7 @@ public class GrpcEngine {
       channel = ClientInterceptors.intercept(channel, Collections.emptyList());
       channelPool.put(group, channel);
     }
-    GrpcClientStrategy grpcClientStrategy = new GrpcClientStrategy(clazz, channel);
+    GrpcClientStrategy grpcClientStrategy = new GrpcClientStrategy(channel, clientDefinition);
     return (T) grpcClientStrategy.getGrpcClient();
   }
 

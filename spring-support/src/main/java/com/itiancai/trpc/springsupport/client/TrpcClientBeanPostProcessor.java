@@ -3,6 +3,7 @@ package com.itiancai.trpc.springsupport.client;
 import com.google.common.collect.Maps;
 
 import com.itiancai.trpc.core.grpc.GrpcEngine;
+import com.itiancai.trpc.core.grpc.annotation.ClientDefinition;
 import com.itiancai.trpc.springsupport.annotation.TrpcClient;
 
 import org.springframework.aop.framework.Advised;
@@ -20,8 +21,6 @@ import java.util.Map;
 public class TrpcClientBeanPostProcessor implements org.springframework.beans.factory.config.BeanPostProcessor {
 
   private Map<String, List<Class>> beansToProcess = Maps.newHashMap();
-
-  private Map<String, Object> trpcClientMap = Maps.newHashMap();
 
   @Autowired
   private GrpcEngine grpcEngine;
@@ -54,8 +53,7 @@ public class TrpcClientBeanPostProcessor implements org.springframework.beans.fa
         for (Field field : clazz.getDeclaredFields()) {
           TrpcClient annotation = AnnotationUtils.getAnnotation(field, TrpcClient.class);
           if (null != annotation) {
-
-            Object trpcClient = getPrpcClient(annotation);
+            Object trpcClient = getTrpcClient(annotation);
             ReflectionUtils.makeAccessible(field);
             ReflectionUtils.setField(field, target, trpcClient);
           }
@@ -77,15 +75,12 @@ public class TrpcClientBeanPostProcessor implements org.springframework.beans.fa
     return target;
   }
 
-  private Object getPrpcClient(TrpcClient annotation) {
-    Object grpcClient;
-    if (trpcClientMap.containsKey(annotation.group())) {
-      grpcClient = trpcClientMap.get(annotation.group());
-    } else {
-      grpcClient = grpcEngine.createClient(annotation.group(), annotation.clazz());
-      trpcClientMap.put(annotation.group(), grpcClient);
-    }
-    return grpcClient;
+  private Object getTrpcClient(TrpcClient annotation) {
+    ClientDefinition clientDefinition = new ClientDefinition(
+            annotation.group(), annotation.clazz(), annotation.retries(), annotation.retryMethods(),
+            annotation.async(), annotation.fallback(), annotation.fallBackMethods(), annotation.callTimeout()
+    );
+    return grpcEngine.createClient(clientDefinition);
   }
 
 

@@ -1,7 +1,5 @@
 package com.itiancai.trpc.core.grpc.client.internal.unary;
 
-import com.google.common.collect.Maps;
-
 import com.itiancai.trpc.core.grpc.GrpcRequest;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
@@ -12,16 +10,11 @@ import com.netflix.hystrix.HystrixThreadPoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import io.grpc.MethodDescriptor;
 
 public abstract class GrpcHystrixCommand<Req, Resp> extends HystrixCommand<Resp> {
 
   private static final Logger logger = LoggerFactory.getLogger(GrpcHystrixCommand.class);
-
-  private static final ConcurrentMap<String, AtomicInteger> concurrents = Maps.newConcurrentMap();
 
   private final String serviceName;
 
@@ -49,10 +42,8 @@ public abstract class GrpcHystrixCommand<Req, Resp> extends HystrixCommand<Resp>
   @Override
   public Resp execute() {
     try {
-      currentConcurrent(this.serviceName, this.methodName).incrementAndGet();
       return super.execute();
     } finally {
-      currentConcurrent(this.serviceName, this.methodName).decrementAndGet();
     }
   }
 
@@ -68,22 +59,11 @@ public abstract class GrpcHystrixCommand<Req, Resp> extends HystrixCommand<Resp>
   @Override
   protected Resp getFallback() {
     try {
-      //TODO fallback
-      return null;
+      return request.getResponseClass().newInstance();
     } catch (Throwable e) {
       //ignore
       return null;
     }
-  }
-
-  protected AtomicInteger currentConcurrent(String serviceName, String methodName) {
-    String key = serviceName + ":" + methodName;
-    AtomicInteger concurrent = concurrents.get(key);
-    if (concurrent == null) {
-      concurrents.putIfAbsent(key, new AtomicInteger());
-      concurrent = concurrents.get(key);
-    }
-    return concurrent;
   }
 
   protected abstract Resp run0(Req req, MethodDescriptor<Req, Resp> methodDesc, Integer timeOut, GrpcUnaryClientCall<Req, Resp> clientCall);

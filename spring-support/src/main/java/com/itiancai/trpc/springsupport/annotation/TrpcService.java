@@ -8,8 +8,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.grpc.ServerInterceptor;
-
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -17,4 +15,5 @@ import io.grpc.ServerInterceptor;
 public @interface TrpcService {
 
   Class<?> value();
+
 }

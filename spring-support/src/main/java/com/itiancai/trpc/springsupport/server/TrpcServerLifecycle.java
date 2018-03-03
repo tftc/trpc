@@ -110,7 +110,10 @@ public class TrpcServerLifecycle implements SmartLifecycle, ApplicationContextAw
     for (String beanName : beanNames) {
       Object trpcService = this.applicationContext.getBean(beanName);
       TrpcService serviceAnnotation = applicationContext.findAnnotationOnBean(beanName, TrpcService.class);
-      definitions.add(new ServiceDefinition(serviceAnnotation.value(), trpcService));
+      ServiceDefinition serviceDefinition = new ServiceDefinition(
+              serviceAnnotation.value(), trpcService
+      );
+      definitions.add(serviceDefinition);
     }
     return definitions;
   }

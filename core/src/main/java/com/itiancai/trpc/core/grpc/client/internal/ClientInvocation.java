@@ -1,6 +1,7 @@
 package com.itiancai.trpc.core.grpc.client.internal;
 
 import com.itiancai.trpc.core.grpc.GrpcRequest;
+import com.itiancai.trpc.core.grpc.annotation.ClientDefinition;
 import com.itiancai.trpc.core.grpc.annotation.GrpcMethodType;
 import com.itiancai.trpc.core.grpc.client.internal.unary.GrpcBlockingUnaryCommand;
 import com.itiancai.trpc.core.grpc.client.internal.unary.GrpcFutureUnaryCommand;
@@ -21,14 +22,16 @@ import io.grpc.stub.StreamObserver;
 public class ClientInvocation implements InvocationHandler {
 
   private Channel channel;
+  private ClientDefinition clientDefinition;
   private Class serviceClass;
 
   private int callType;
   private int callTimeout;
 
-  public ClientInvocation(Channel channel, Class serviceClass, int callType, int callTimeout) {
+  public ClientInvocation(Channel channel, ClientDefinition clientDefinition, int callType, int callTimeout) {
     this.channel = channel;
-    this.serviceClass = serviceClass;
+    this.clientDefinition = clientDefinition;
+    this.serviceClass = clientDefinition.getClazz();
     this.callType = callType;
     this.callTimeout = callTimeout;
   }
@@ -40,13 +43,13 @@ public class ClientInvocation implements InvocationHandler {
     try {
       switch (methodType) {
         case UNARY:
-          return unaryCall(method, args);
+          return unaryCall(method, grpcMethodType, args);
         case CLIENT_STREAMING:
-          return streamCall(method, args);
+          return streamCall(method, grpcMethodType, args);
         case SERVER_STREAMING:
-          return streamCall(method, args);
+          return streamCall(method, grpcMethodType, args);
         case BIDI_STREAMING:
-          return streamCall(method, args);
+          return streamCall(method, grpcMethodType, args);
         default:
           throw new RuntimeException("xxx");
       }
@@ -54,8 +57,7 @@ public class ClientInvocation implements InvocationHandler {
     }
   }
 
-  private Object streamCall(Method method, Object[] args) {
-    GrpcMethodType grpcMethodType = method.getAnnotation(GrpcMethodType.class);
+  private Object streamCall(Method method, GrpcMethodType grpcMethodType, Object[] args) {
     MethodDescriptor.MethodType methodType = grpcMethodType.methodType();
     MethodDescriptor methodDesc = GrpcUtils.createMethodDescriptor(serviceClass, method);
     switch (methodType) {
@@ -82,22 +84,24 @@ public class ClientInvocation implements InvocationHandler {
 
   }
 
-  private Object unaryCall(Method method, Object[] args) {
+  private Object unaryCall(Method method, GrpcMethodType grpcMethodType, Object[] args) {
     GrpcHystrixCommand hystrixCommand;
     MethodDescriptor methodDesc = GrpcUtils.createMethodDescriptor(serviceClass, method);
+    boolean fallback = clientDefinition.validFallBack(method.getName());
     switch (callType) {
       case 1:
-        hystrixCommand = new GrpcFutureUnaryCommand(serviceClass.getName(), method.getName(), false);
+        hystrixCommand = new GrpcFutureUnaryCommand(serviceClass.getName(), method.getName(), fallback);
         break;
       case 2:
-        hystrixCommand = new GrpcBlockingUnaryCommand(serviceClass.getName(), method.getName(), false);
+        hystrixCommand = new GrpcBlockingUnaryCommand(serviceClass.getName(), method.getName(), fallback);
         break;
       default:
-        hystrixCommand = new GrpcFutureUnaryCommand(serviceClass.getName(), method.getName(), false);
+        hystrixCommand = new GrpcFutureUnaryCommand(serviceClass.getName(), method.getName(), fallback);
     }
-    GrpcRequest request = new GrpcRequest(methodDesc, args[0], callType, callTimeout);
+    GrpcRequest request = new GrpcRequest(methodDesc, grpcMethodType.responseClass(), grpcMethodType.responseClass(), args[0], callType, callTimeout);
     hystrixCommand.setRequest(request);
-    hystrixCommand.setClientCall(GrpcUnaryClientCall.create(channel, 0));
+    int retryCnt = clientDefinition.retryCnt(method.getName());
+    hystrixCommand.setClientCall(GrpcUnaryClientCall.create(channel, retryCnt));
     return hystrixCommand.execute();
 
   }

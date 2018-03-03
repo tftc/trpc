@@ -20,6 +20,7 @@ public class GrpcBlockingUnaryCommand<Req, Resp> extends GrpcHystrixCommand<Req,
       return clientCall.blockingUnaryResult(req, methodDesc);
     } catch (Throwable e) {
       logger.error(e.getMessage(), e);
+      //TODO 自定义服务异常
       throw new RuntimeException();
     }
   }

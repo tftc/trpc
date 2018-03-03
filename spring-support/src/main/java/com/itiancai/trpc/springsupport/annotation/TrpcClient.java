@@ -18,4 +18,16 @@ public @interface TrpcClient {
   String group();
 
   Class<?> clazz();
+
+  int retries() default 0;
+
+  String[] retryMethods() default {};
+
+  boolean async() default true;
+
+  boolean fallback() default false;
+
+  String[] fallBackMethods() default {};
+
+  int callTimeout() default 5000;
 }
