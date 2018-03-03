@@ -1,6 +1,11 @@
 package com.itiancai.trpc.core.grpc.client.internal;
 
+import com.itiancai.trpc.core.grpc.GrpcRequest;
 import com.itiancai.trpc.core.grpc.annotation.GrpcMethodType;
+import com.itiancai.trpc.core.grpc.client.internal.unary.GrpcBlockingUnaryCommand;
+import com.itiancai.trpc.core.grpc.client.internal.unary.GrpcFutureUnaryCommand;
+import com.itiancai.trpc.core.grpc.client.internal.unary.GrpcHystrixCommand;
+import com.itiancai.trpc.core.grpc.client.internal.unary.GrpcUnaryClientCall;
 import com.itiancai.trpc.core.utils.GrpcUtils;
 
 import java.lang.reflect.InvocationHandler;
@@ -18,9 +23,14 @@ public class ClientInvocation implements InvocationHandler {
   private Channel channel;
   private Class serviceClass;
 
+  private int callType;
+  private int callTimeout;
+
   public ClientInvocation(Channel channel, Class serviceClass, int callType, int callTimeout) {
     this.channel = channel;
     this.serviceClass = serviceClass;
+    this.callType = callType;
+    this.callTimeout = callTimeout;
   }
 
   @Override
@@ -73,8 +83,22 @@ public class ClientInvocation implements InvocationHandler {
   }
 
   private Object unaryCall(Method method, Object[] args) {
+    GrpcHystrixCommand hystrixCommand;
     MethodDescriptor methodDesc = GrpcUtils.createMethodDescriptor(serviceClass, method);
-    return ClientCalls.blockingUnaryCall(channel, methodDesc, CallOptions.DEFAULT, args[0]);
+    switch (callType) {
+      case 1:
+        hystrixCommand = new GrpcFutureUnaryCommand(serviceClass.getName(), method.getName(), false);
+        break;
+      case 2:
+        hystrixCommand = new GrpcBlockingUnaryCommand(serviceClass.getName(), method.getName(), false);
+        break;
+      default:
+        hystrixCommand = new GrpcFutureUnaryCommand(serviceClass.getName(), method.getName(), false);
+    }
+    GrpcRequest request = new GrpcRequest(methodDesc, args[0], callType, callTimeout);
+    hystrixCommand.setRequest(request);
+    hystrixCommand.setClientCall(GrpcUnaryClientCall.create(channel, 0));
+    return hystrixCommand.execute();
 
   }
 }

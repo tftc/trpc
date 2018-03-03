@@ -17,6 +17,6 @@ public class GrpcClientStrategy<T> {
 
   public T getGrpcClient() {
     //TODO(@bao)
-    return grpcProtocolClient.getGrpcClient(channel, 0, 0);
+    return grpcProtocolClient.getGrpcClient(channel, 1, 5000);
   }
 }

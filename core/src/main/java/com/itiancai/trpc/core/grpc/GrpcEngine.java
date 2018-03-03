@@ -31,7 +31,7 @@ public class GrpcEngine {
   }
 
   public <T> T createClient(String group, Class<T> clazz) {
-    Channel channel = channelPool.get(group);
+      Channel channel = channelPool.get(group);
     if (channel == null) {
       NettyChannelBuilder builder = NettyChannelBuilder.forTarget(group);
       if (registry != null) {

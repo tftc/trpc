@@ -42,8 +42,7 @@ public class DefaultProxyExporter implements GrpcProtocolExporter {
           serviceDefBuilder.addMethod(methodDescriptor, ServerCalls.asyncBidiStreamingCall(serverInvocation));
           break;
         default:
-          //TODO(@bao) 自定义异常
-          throw new RuntimeException("xx");
+          throw new RuntimeException("service not fund");
       }
     }
     return serviceDefBuilder.build();

@@ -7,6 +7,7 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.itiancai.trpc.core.registry.NotifyServiceListener;
 import com.itiancai.trpc.core.registry.Registry;
 import com.itiancai.trpc.core.registry.ServiceAddress;
+import com.itiancai.trpc.core.utils.GrpcUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -79,6 +80,11 @@ public class ConsulRegistry implements Registry {
       Map<String, String> metadata = serviceInstance.getMetadata();
       if (metadata.get(REGISTRY_KEY) != null) {
         Integer port = Integer.valueOf(metadata.get(REGISTRY_KEY));
+        if(GrpcUtils.isIP(serviceInstance.getHost())) {
+
+        } else {
+
+        }
         addressSet.add(new ServiceAddress(serviceInstance.getHost(), port));
       }
     }

@@ -5,6 +5,7 @@ import com.itiancai.trpc.core.grpc.marshaller.DefaultMarshaller;
 import com.itiancai.trpc.core.grpc.server.internal.ServerInvocation;
 
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 import io.grpc.MethodDescriptor;
 
@@ -32,5 +33,15 @@ public class GrpcUtils {
 
   private static  <T> MethodDescriptor.Marshaller buildMarshaller(Class<T> clazz) {
     return new DefaultMarshaller<>(clazz);
+  }
+
+  private static final Pattern IP_PATTERN = Pattern.compile(
+          "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}");
+
+  public static boolean isIP(String addr) {
+    if (addr.length() < 7 || addr.length() > 15 || "".equals(addr)) {
+      return false;
+    }
+    return IP_PATTERN.matcher(addr).find();
   }
 }

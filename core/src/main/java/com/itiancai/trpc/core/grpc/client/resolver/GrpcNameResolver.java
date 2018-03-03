@@ -3,17 +3,21 @@ package com.itiancai.trpc.core.grpc.client.resolver;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.net.InetAddresses;
 
 import com.itiancai.trpc.core.registry.NotifyServiceListener;
 import com.itiancai.trpc.core.registry.Registry;
 import com.itiancai.trpc.core.registry.ServiceAddress;
+import com.itiancai.trpc.core.utils.GrpcUtils;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.logging.Logger;
 
 import io.grpc.Attributes;
 import io.grpc.EquivalentAddressGroup;
@@ -108,8 +112,11 @@ public class GrpcNameResolver extends NameResolver {
       if(serviceSet.size() != addressSet.size() || !serviceSet.containsAll(addressSet)) {
         List<EquivalentAddressGroup> equivalentAddressGroups = Lists.newArrayList();
         for (ServiceAddress serviceAddress : addressSet) {
-          EquivalentAddressGroup addressGroup = new EquivalentAddressGroup(new InetSocketAddress(serviceAddress.getHost(), serviceAddress.getPort()), Attributes.EMPTY);
-          equivalentAddressGroups.add(addressGroup);
+          if(GrpcUtils.isIP(serviceAddress.getHost())) {
+            IpResolved(equivalentAddressGroups, serviceAddress.getHost(), serviceAddress.getPort());
+          } else {
+            DnsResolved(equivalentAddressGroups, serviceAddress.getHost(), serviceAddress.getPort());
+          }
         }
         GrpcNameResolver.this.listener.onAddresses(equivalentAddressGroups, Attributes.EMPTY);
         serviceSet = addressSet; //update serviceSet
@@ -118,5 +125,30 @@ public class GrpcNameResolver extends NameResolver {
       GrpcNameResolver.this.listener.onError(Status.UNAVAILABLE.withCause(new RuntimeException("UNAVAILABLE: NameResolver returned an empty list")));
       serviceSet = addressSet; //update serviceSet
     }
+  }
+
+
+
+  private void DnsResolved(List<EquivalentAddressGroup> servers, String host, int port) {
+    try {
+      InetAddress[] inetAddrs = InetAddress.getAllByName(host);
+      for (int j = 0; j < inetAddrs.length; j++) {
+        InetAddress inetAddr = inetAddrs[j];
+        SocketAddress sock = new InetSocketAddress(inetAddr, port);
+        addSocketAddress(servers, sock);
+      }
+    } catch (UnknownHostException e) {
+      GrpcNameResolver.this.listener.onError(Status.NOT_FOUND.withDescription("There is no service registy in consul "));
+    }
+  }
+
+  private void IpResolved(List<EquivalentAddressGroup> servers, String host, int port) {
+    SocketAddress sock = new InetSocketAddress(InetAddresses.forString(host), port);
+    addSocketAddress(servers, sock);
+  }
+
+  private void addSocketAddress(List<EquivalentAddressGroup> servers, SocketAddress sock) {
+    EquivalentAddressGroup server = new EquivalentAddressGroup(sock);
+    servers.add(server);
   }
 }
