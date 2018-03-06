@@ -4,7 +4,10 @@
 
 ### compile-generator
 
-> generator：依据protobuf文件生成pojo类及interface，支持message、enum、service(any oneof暂不支持)。
+ generator：
+ 依据protobuf文件生成pojo类及interface，支持message、enum、service(any oneof暂不支持)。
+ * parser:protostuff解析protobuf文件
+ * 序列化|反序列号：[jprotobuf](https://github.com/jhunters/jprotobuf)
 
 proto文件：
 ``` proto

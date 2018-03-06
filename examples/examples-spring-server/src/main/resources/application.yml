@@ -1,6 +1,11 @@
 spring:
   application:
     name: cloud-trpc-server
+  sleuth:
+    sampler:
+      percentage: 1
+    scheduled:
+      enabled: true
   cloud:
     consul:
       host: localhost

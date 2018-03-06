@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 import com.itiancai.trpc.core.grpc.GrpcEngine;
 import com.itiancai.trpc.core.grpc.annotation.ServiceDefinition;
 import com.itiancai.trpc.springsupport.annotation.TrpcService;
+import com.itiancai.trpc.springsupport.server.interceptor.TraceServerInterceptor;
+import com.itiancai.trpc.springsupport.server.interceptor.internal.GlobalServerInterceptorRegistry;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.grpc.Server;
+import io.grpc.ServerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -110,9 +113,9 @@ public class TrpcServerLifecycle implements SmartLifecycle, ApplicationContextAw
     for (String beanName : beanNames) {
       Object trpcService = this.applicationContext.getBean(beanName);
       TrpcService serviceAnnotation = applicationContext.findAnnotationOnBean(beanName, TrpcService.class);
-      ServiceDefinition serviceDefinition = new ServiceDefinition(
-              serviceAnnotation.value(), trpcService
-      );
+      ServiceDefinition serviceDefinition = new ServiceDefinition(serviceAnnotation.value(), trpcService);
+      GlobalServerInterceptorRegistry globalServerInterceptorRegistry = applicationContext.getBean(GlobalServerInterceptorRegistry.class);
+      serviceDefinition.addInterceptors(globalServerInterceptorRegistry.getServerInterceptors());
       definitions.add(serviceDefinition);
     }
     return definitions;

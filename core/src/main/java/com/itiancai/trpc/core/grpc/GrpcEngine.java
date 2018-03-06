@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptors;
 import io.grpc.Server;
+import io.grpc.ServerInterceptors;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.NettyServerBuilder;
 import io.grpc.util.RoundRobinLoadBalancerFactory;
@@ -44,7 +46,7 @@ public class GrpcEngine {
               .keepAliveTime(1, TimeUnit.DAYS)
               .directExecutor()
               .build();
-      channel = ClientInterceptors.intercept(channel, Collections.emptyList());
+      channel = ClientInterceptors.intercept(channel, clientDefinition.getInterceptorList());
       channelPool.put(group, channel);
     }
     GrpcClientStrategy grpcClientStrategy = new GrpcClientStrategy(channel, clientDefinition);
@@ -55,7 +57,10 @@ public class GrpcEngine {
     NettyServerBuilder builder = NettyServerBuilder.forPort(port);
     for (ServiceDefinition definition : definitionList) {
       GrpcServerStrategy grpcServerStrategy = new GrpcServerStrategy(definition.getClazz(), definition.getImpl());
-      builder.addService(grpcServerStrategy.getServerDefintion());
+      ServerServiceDefinition serverServiceDefinition = ServerInterceptors.intercept(
+              grpcServerStrategy.getServerDefintion(), definition.getInterceptorList()
+      );
+      builder.addService(serverServiceDefinition);
     }
     if(registry != null) {
       registry.register(port);

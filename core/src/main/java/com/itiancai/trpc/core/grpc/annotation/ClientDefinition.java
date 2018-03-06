@@ -1,7 +1,10 @@
 package com.itiancai.trpc.core.grpc.annotation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import io.grpc.ClientInterceptor;
 
 public class ClientDefinition<T> {
 
@@ -13,6 +16,8 @@ public class ClientDefinition<T> {
   private boolean fallback;
   private String[] fallBackMethods;
   private int callTimeout;
+
+  private List<ClientInterceptor> interceptorList = new ArrayList<>();
 
   public ClientDefinition(String group, Class<T> clazz, int retries, String[] retryMethods, boolean async, boolean fallback, String[] fallBackMethods, int callTimeout) {
     this.group = group;
@@ -69,5 +74,17 @@ public class ClientDefinition<T> {
     } else {
       return 0;
     }
+  }
+
+  public void addInterceptor(ClientInterceptor interceptor) {
+    this.interceptorList.add(interceptor);
+  }
+
+  public void addInterceptors(List<ClientInterceptor> interceptor) {
+    this.interceptorList.addAll(interceptor);
+  }
+
+  public List<ClientInterceptor> getInterceptorList() {
+    return interceptorList;
   }
 }

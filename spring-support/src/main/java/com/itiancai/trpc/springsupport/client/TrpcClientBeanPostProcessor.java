@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.itiancai.trpc.core.grpc.GrpcEngine;
 import com.itiancai.trpc.core.grpc.annotation.ClientDefinition;
 import com.itiancai.trpc.springsupport.annotation.TrpcClient;
+import com.itiancai.trpc.springsupport.client.interceptor.internal.GlobalClientInterceptorRegistry;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -24,6 +25,9 @@ public class TrpcClientBeanPostProcessor implements org.springframework.beans.fa
 
   @Autowired
   private GrpcEngine grpcEngine;
+
+  @Autowired
+  private GlobalClientInterceptorRegistry globalClientInterceptorRegistry;
 
   public TrpcClientBeanPostProcessor() {
   }
@@ -80,6 +84,7 @@ public class TrpcClientBeanPostProcessor implements org.springframework.beans.fa
             annotation.group(), annotation.clazz(), annotation.retries(), annotation.retryMethods(),
             annotation.async(), annotation.fallback(), annotation.fallBackMethods(), annotation.callTimeout()
     );
+    clientDefinition.addInterceptors(globalClientInterceptorRegistry.getClientInterceptors());
     return grpcEngine.createClient(clientDefinition);
   }
 

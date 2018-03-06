@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: trpc-spring-client
+  sleuth:
+    sampler:
+      percentage: 1
   cloud:
     consul:
       host: localhost
