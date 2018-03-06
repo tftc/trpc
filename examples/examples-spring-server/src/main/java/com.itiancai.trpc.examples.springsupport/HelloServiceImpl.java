@@ -13,6 +13,11 @@ public class HelloServiceImpl implements HelloService {
     @Override
     public HelloReply sayHello(HelloRequest request) {
       System.out.println("sayHello:"+request.getName());
+      try {
+        Thread.sleep(80);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
       HelloReply reply = new HelloReply();
       reply.setMessage("hello " + request.getName());
       return reply;

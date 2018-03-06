@@ -1,5 +1,7 @@
 package com.itiancai.trpc.springsupport.server.interceptor;
 
+import com.itiancai.trpc.springsupport.util.SpanUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.sleuth.Span;
@@ -30,22 +32,22 @@ public class TraceServerInterceptor implements ServerInterceptor {
 
   @Override
   public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-    log.info("TraceServerInterceptor start ...");
-    final Span span = spanExtractor.joinTrace(headers);
-    tracer.continueSpan(span);
-    Span gRPCSpan = tracer.createSpan("gRPC:" + call.getMethodDescriptor().getFullMethodName());
+
+    //span create
+    tracer.continueSpan(spanExtractor.joinTrace(headers));
+    Span gRPCSpan = tracer.createSpan(SpanUtils.buildSpanName(call.getMethodDescriptor()));
+
+    //span sr
     gRPCSpan.logEvent(Span.SERVER_RECV);
     gRPCSpan.tag(Span.SPAN_LOCAL_COMPONENT_TAG_NAME, GRPC_COMPONENT);
+
     return next.startCall(new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
 
       @SuppressWarnings("ConstantConditions")
       @Override
       public void close(Status status, Metadata trailers) {
+        Status.Code statusCode = status.getCode();
         try {
-          Status.Code statusCode = status.getCode();
-          tracer.continueSpan(gRPCSpan);
-          gRPCSpan.logEvent(Span.SERVER_SEND);
-          tracer.addTag("gRPC status code", String.valueOf(statusCode.value()));
           if (!status.isOk()) {
             tracer.addTag(Span.SPAN_ERROR_TAG_NAME, ExceptionUtils.getExceptionMessage(status.getCause()));
           }
@@ -53,8 +55,11 @@ public class TraceServerInterceptor implements ServerInterceptor {
         } catch (Throwable t) {
           log.warn("call had closed, msg:{}", t.getMessage());
         } finally {
-          log.info("TraceServerInterceptor end !");
-          tracer.close(gRPCSpan);
+          //span ss
+          Span span = tracer.continueSpan(gRPCSpan);
+          span.logEvent(Span.SERVER_SEND);
+          tracer.addTag("gRPC status code", String.valueOf(statusCode.value()));
+          tracer.close(span);
         }
       }
     }, headers);

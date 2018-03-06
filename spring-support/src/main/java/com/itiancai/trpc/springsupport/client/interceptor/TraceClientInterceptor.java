@@ -1,5 +1,7 @@
 package com.itiancai.trpc.springsupport.client.interceptor;
 
+import com.itiancai.trpc.springsupport.util.SpanUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.sleuth.Span;
@@ -16,6 +18,8 @@ import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import io.grpc.StatusException;
+
+import static com.itiancai.trpc.springsupport.util.SpanUtils.buildSpanName;
 
 public class TraceClientInterceptor implements ClientInterceptor {
 
@@ -35,29 +39,31 @@ public class TraceClientInterceptor implements ClientInterceptor {
       @Override
       protected void checkedStart(ClientCall.Listener<RespT> responseListener, Metadata headers)
               throws StatusException {
+        //create span
+        String spanName = SpanUtils.buildSpanName(method);
+        final Span grpcSpan = tracer.createSpan(spanName);
 
         //span cs
-        final Span grpcSpan = tracer.createSpan("invoke gRPC:" + method.getFullMethodName());
         spanInjector.inject(grpcSpan, headers);
         grpcSpan.logEvent(Span.CLIENT_SEND);
 
-        Listener<RespT> tracingResponseListener = new ForwardingClientCallListener
-                .SimpleForwardingClientCallListener<RespT>(responseListener) {
+        Listener<RespT> tracingResponseListener = new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
 
           @Override
           public void onClose(Status status, Metadata trailers) {
-            //span cr
-            tracer.continueSpan(grpcSpan);
-            Span grpcSpan = tracer.getCurrentSpan();
-            grpcSpan.logEvent(Span.CLIENT_RECV);
-            tracer.close(grpcSpan);
-
-            if (status.isOk()) {
-              log.debug("Call finish success");
-            } else {
-              log.warn("Call finish failed", status.getDescription());
+            try {
+              if (status.isOk()) {
+                log.debug("Call finish success");
+              } else {
+                log.warn("Call finish failed", status.getDescription());
+              }
+              delegate().onClose(status, trailers);
+            } finally {
+              //span cr
+              Span span = tracer.continueSpan(grpcSpan);
+              span.logEvent(Span.CLIENT_RECV);
+              tracer.close(span);
             }
-            delegate().onClose(status, trailers);
           }
         };
         delegate().start(tracingResponseListener, headers);
