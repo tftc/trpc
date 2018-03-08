@@ -1,6 +1,6 @@
-package com.itiancai.trpc.springsupport.server.interceptor;
+package com.itiancai.trpc.trace.grpc.server;
 
-import com.itiancai.trpc.springsupport.util.SpanUtils;
+import com.itiancai.trpc.trace.util.SpanUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

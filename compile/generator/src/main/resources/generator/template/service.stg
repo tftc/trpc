@@ -1,10 +1,6 @@
 delimiters "<", ">"
 import "generator/template/core.stg"
 
-service_compiler_enabled(service) ::= "true"
-service_compiler_output(service) ::= "<service.proto.javaPackagePath>/<service.javaName>.java"
-service_compiler_template(service) ::= "<service:service()>"
-
 service(service) ::= <<
 package <service.proto.javaPackage>;
 

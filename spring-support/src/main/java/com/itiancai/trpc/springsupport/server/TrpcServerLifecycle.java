@@ -5,8 +5,7 @@ import com.google.common.collect.Lists;
 import com.itiancai.trpc.core.grpc.GrpcEngine;
 import com.itiancai.trpc.core.grpc.annotation.ServiceDefinition;
 import com.itiancai.trpc.springsupport.annotation.TrpcService;
-import com.itiancai.trpc.springsupport.server.interceptor.TraceServerInterceptor;
-import com.itiancai.trpc.springsupport.server.interceptor.internal.GlobalServerInterceptorRegistry;
+import com.itiancai.trpc.springsupport.server.interceptor.GlobalServerInterceptorRegistry;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.grpc.Server;
-import io.grpc.ServerInterceptor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

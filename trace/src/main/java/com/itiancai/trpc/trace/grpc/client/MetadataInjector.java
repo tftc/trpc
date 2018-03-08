@@ -1,4 +1,4 @@
-package com.itiancai.trpc.springsupport.client.interceptor;
+package com.itiancai.trpc.trace.grpc.client;
 
 import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.SpanInjector;

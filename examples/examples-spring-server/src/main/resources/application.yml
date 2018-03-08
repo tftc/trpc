@@ -20,6 +20,21 @@ trpc:
   server:
     port: 9090
 
+ratelimit:
+  enabled: true
+  server: GRPC
+  default-policy: #optional - will apply unless specific policy exists
+    limit: 3 #optional - request number limit per refresh interval window
+    quota: 1000 #optional - request time limit per refresh interval window (in seconds)
+    refresh-interval: 60 #default value (in seconds)
+    type: origin
+  policies:
+    sayHello:
+      limit: 3 #optional - request number limit per refresh interval window
+      quota: 1000 #optional - request time limit per refresh interval window (in seconds)
+      refresh-interval: 60 #default value (in seconds)
+      type: origin
+
 # eureka配置
 #spring:
 #  application:

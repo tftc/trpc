@@ -1,4 +1,4 @@
-package com.itiancai.trpc.springsupport.server.interceptor.internal;
+package com.itiancai.trpc.springsupport.server.interceptor;
 
 public abstract class GlobalServerInterceptorConfigurerAdapter {
 

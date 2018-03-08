@@ -1,6 +1,7 @@
-package com.itiancai.trpc.springsupport.client.interceptor;
+package com.itiancai.trpc.trace.grpc.client;
 
-import com.itiancai.trpc.springsupport.util.SpanUtils;
+
+import com.itiancai.trpc.trace.util.SpanUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,6 @@ import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import io.grpc.StatusException;
 
-import static com.itiancai.trpc.springsupport.util.SpanUtils.buildSpanName;
-
 public class TraceClientInterceptor implements ClientInterceptor {
 
   private static final Logger log = LoggerFactory.getLogger(TraceClientInterceptor.class);
@@ -37,7 +36,7 @@ public class TraceClientInterceptor implements ClientInterceptor {
   public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(final MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
     return new ClientInterceptors.CheckedForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
       @Override
-      protected void checkedStart(ClientCall.Listener<RespT> responseListener, Metadata headers)
+      protected void checkedStart(Listener<RespT> responseListener, Metadata headers)
               throws StatusException {
         //create span
         String spanName = SpanUtils.buildSpanName(method);

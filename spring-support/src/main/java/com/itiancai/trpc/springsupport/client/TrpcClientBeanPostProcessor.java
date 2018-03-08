@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.itiancai.trpc.core.grpc.GrpcEngine;
 import com.itiancai.trpc.core.grpc.annotation.ClientDefinition;
 import com.itiancai.trpc.springsupport.annotation.TrpcClient;
-import com.itiancai.trpc.springsupport.client.interceptor.internal.GlobalClientInterceptorRegistry;
+import com.itiancai.trpc.springsupport.client.interceptor.GlobalClientInterceptorRegistry;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;

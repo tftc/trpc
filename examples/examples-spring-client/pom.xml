@@ -13,6 +13,21 @@
     <name>trpc-examples-spring-client</name>
     <dependencies>
         <dependency>
+            <groupId>com.itiancai.trpc</groupId>
+            <artifactId>examples-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itiancai.trpc</groupId>
+            <artifactId>spring-support</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itiancai.trpc</groupId>
+            <artifactId>trace</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-all</artifactId>
         </dependency>
@@ -23,16 +38,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-zipkin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.itiancai.trpc</groupId>
-            <artifactId>examples-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.itiancai.trpc</groupId>
-            <artifactId>spring-support</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

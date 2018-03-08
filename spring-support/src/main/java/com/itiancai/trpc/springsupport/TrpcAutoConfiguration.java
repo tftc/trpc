@@ -4,17 +4,11 @@ import com.itiancai.trpc.core.grpc.GrpcEngine;
 import com.itiancai.trpc.core.registry.Registry;
 import com.itiancai.trpc.springsupport.annotation.TrpcClient;
 import com.itiancai.trpc.springsupport.client.TrpcClientBeanPostProcessor;
-import com.itiancai.trpc.springsupport.client.interceptor.MetadataInjector;
-import com.itiancai.trpc.springsupport.client.interceptor.TraceClientInterceptor;
-import com.itiancai.trpc.springsupport.client.interceptor.internal.GlobalClientInterceptorConfigurerAdapter;
-import com.itiancai.trpc.springsupport.client.interceptor.internal.GlobalClientInterceptorRegistry;
+import com.itiancai.trpc.springsupport.client.interceptor.GlobalClientInterceptorRegistry;
 import com.itiancai.trpc.springsupport.registry.ConsulRegistry;
 import com.itiancai.trpc.springsupport.server.TrpcServerLifecycle;
 import com.itiancai.trpc.springsupport.server.TrpcServerProperties;
-import com.itiancai.trpc.springsupport.server.interceptor.MetadataExtractor;
-import com.itiancai.trpc.springsupport.server.interceptor.TraceServerInterceptor;
-import com.itiancai.trpc.springsupport.server.interceptor.internal.GlobalServerInterceptorConfigurerAdapter;
-import com.itiancai.trpc.springsupport.server.interceptor.internal.GlobalServerInterceptorRegistry;
+import com.itiancai.trpc.springsupport.server.interceptor.GlobalServerInterceptorRegistry;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -27,7 +21,6 @@ import org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties;
 import org.springframework.cloud.consul.discovery.HeartbeatProperties;
 import org.springframework.cloud.consul.serviceregistry.ConsulAutoRegistration;
 import org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistryAutoConfiguration;
-import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,22 +77,6 @@ public class TrpcAutoConfiguration {
       return new TrpcClientBeanPostProcessor();
     }
 
-    //Client分布式追踪拦截器配置
-    @Configuration
-    @ConditionalOnProperty(value = "spring.sleuth.scheduled.enabled", matchIfMissing = true)
-    @ConditionalOnClass(Tracer.class)
-    protected static class TraceClientAutoConfiguration {
-      @Bean
-      public GlobalClientInterceptorConfigurerAdapter globalTraceClientInterceptorConfigurerAdapter(final Tracer tracer) {
-        return new GlobalClientInterceptorConfigurerAdapter() {
-          @Override
-          public void addClientInterceptors(GlobalClientInterceptorRegistry registry) {
-            registry.addClientInterceptors(new TraceClientInterceptor(tracer, new MetadataInjector()));
-          }
-        };
-      }
-    }
-
   }
 
   @Configuration
@@ -124,24 +101,6 @@ public class TrpcAutoConfiguration {
     @ConditionalOnMissingBean
     public TrpcServerLifecycle trpcServerLifecycle(GrpcEngine grpcEngine, TrpcServerProperties serverProperties) {
       return new TrpcServerLifecycle(grpcEngine, serverProperties);
-    }
-
-    //Server分布式追踪拦截器配置
-    @Configuration
-    @ConditionalOnProperty(value = "spring.sleuth.scheduled.enabled", matchIfMissing = true)
-    @ConditionalOnClass(Tracer.class)
-    protected static class TraceServerAutoConfiguration {
-
-      @Bean
-      public GlobalServerInterceptorConfigurerAdapter globalTraceServerInterceptorConfigurerAdapter(final Tracer tracer) {
-        return new GlobalServerInterceptorConfigurerAdapter() {
-          @Override
-          public void addServerInterceptors(GlobalServerInterceptorRegistry registry) {
-            registry.addServerInterceptors(new TraceServerInterceptor(tracer, new MetadataExtractor()));
-          }
-        };
-      }
-
     }
   }
 

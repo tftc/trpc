@@ -10,6 +10,8 @@
     <modules>
         <module>core</module>
         <module>compile</module>
+        <module>trace</module>
+        <module>rate-limit</module>
         <module>spring-support</module>
     </modules>
     <properties>
