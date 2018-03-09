@@ -1,5 +1,6 @@
 package com.itiancai.trpc.trace.mysql;
 
+import com.itiancai.trpc.trace.util.SpanUtils;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.ResultSetInternalMethods;
@@ -28,8 +29,8 @@ public class TracingStatementInterceptor implements StatementInterceptorV2 {
   public ResultSetInternalMethods preProcess(String sql, Statement interceptedStatement,
                                              Connection connection) throws SQLException {
     if(tracer == null) return null;
-
-    Span span = tracer.createSpan(getSpanName(connection));
+    String spanName = SpanUtils.mysqlSpanName(connection);
+    Span span = tracer.createSpan(spanName);
     if (interceptedStatement instanceof PreparedStatement) {
       sql = ((PreparedStatement) interceptedStatement).getPreparedSql();
     }
@@ -53,21 +54,6 @@ public class TracingStatementInterceptor implements StatementInterceptorV2 {
     span.logEvent(Span.CLIENT_RECV);
     tracer.close(span);
     return null;
-  }
-
-  private String getSpanName(Connection connection) {
-    try {
-      String spanName;
-      String databaseName = connection.getCatalog();
-      if (databaseName != null && !databaseName.isEmpty()) {
-        spanName = "mysql-" + databaseName;
-      } else {
-        spanName = "mysql";
-      }
-      return spanName;
-    } catch (Exception e) {
-      return "mysql";
-    }
   }
 
   @Override public boolean executeTopLevelOnly() {

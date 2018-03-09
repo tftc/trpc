@@ -201,12 +201,21 @@ public interface Registry {
  * TrpcServer声明周期管理
  * TrpcClient依赖注入
  * 自定义Interceptor
- * 分布式追踪(sleuth zipkin)
+
+## 分布式追踪(sleuth zipkin)
+
+ * grpc trce
+ * mysql trace
+ * 
  
 ## 限流 
+ 
+ * grpc限流  
 
-## 监控
+## 监控 ?
 
-## gateway
+## 配置 ?
+
+## gateway ?
 
 > 协议转换 路由 限流 授权 黑名单 ...

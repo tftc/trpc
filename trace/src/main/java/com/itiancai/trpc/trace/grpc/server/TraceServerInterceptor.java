@@ -35,7 +35,7 @@ public class TraceServerInterceptor implements ServerInterceptor {
 
     //span create
     tracer.continueSpan(spanExtractor.joinTrace(headers));
-    Span gRPCSpan = tracer.createSpan(SpanUtils.buildSpanName(call.getMethodDescriptor()));
+    Span gRPCSpan = tracer.createSpan(SpanUtils.grpcSpanName(call.getMethodDescriptor()));
 
     //span sr
     gRPCSpan.logEvent(Span.SERVER_RECV);

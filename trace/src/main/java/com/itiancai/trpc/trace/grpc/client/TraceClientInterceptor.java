@@ -39,7 +39,7 @@ public class TraceClientInterceptor implements ClientInterceptor {
       protected void checkedStart(Listener<RespT> responseListener, Metadata headers)
               throws StatusException {
         //create span
-        String spanName = SpanUtils.buildSpanName(method);
+        String spanName = SpanUtils.grpcSpanName(method);
         final Span grpcSpan = tracer.createSpan(spanName);
 
         //span cs

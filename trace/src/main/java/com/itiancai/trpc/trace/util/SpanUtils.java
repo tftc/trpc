@@ -1,5 +1,7 @@
 package com.itiancai.trpc.trace.util;
 
+import com.mysql.jdbc.Connection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +11,7 @@ public class SpanUtils {
 
   private final static Logger log = LoggerFactory.getLogger(SpanUtils.class);
 
-  public static String buildSpanName(MethodDescriptor methodDescriptor) {
+  public static String grpcSpanName(MethodDescriptor methodDescriptor) {
     try {
       String fullName = methodDescriptor.getFullMethodName();
 
@@ -29,8 +31,25 @@ public class SpanUtils {
       sb.append(methodName);
       return sb.toString();
     } catch (Throwable t) {
-      log.error("buildSpanName error, method:" + methodDescriptor.getFullMethodName(), t);
+      log.error("grpcSpanName error, method:" + methodDescriptor.getFullMethodName(), t);
       return methodDescriptor.getFullMethodName();
+    }
+  }
+
+
+
+  public static String mysqlSpanName(Connection connection) {
+    try {
+      String spanName;
+      String databaseName = connection.getCatalog();
+      if (databaseName != null && !databaseName.isEmpty()) {
+        spanName = "mysql-" + databaseName;
+      } else {
+        spanName = "mysql";
+      }
+      return spanName;
+    } catch (Exception e) {
+      return "mysql";
     }
   }
 
