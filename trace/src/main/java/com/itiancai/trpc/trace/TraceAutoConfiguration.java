@@ -11,6 +11,7 @@ import com.itiancai.trpc.trace.grpc.client.MetadataInjector;
 import com.itiancai.trpc.trace.grpc.client.TraceClientInterceptor;
 import com.itiancai.trpc.trace.grpc.server.MetadataExtractor;
 import com.itiancai.trpc.trace.grpc.server.TraceServerInterceptor;
+import com.itiancai.trpc.trace.mysql.MySqlTracerInit;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -51,6 +52,19 @@ public class TraceAutoConfiguration {
           registry.addServerInterceptors(new TraceServerInterceptor(tracer, new MetadataExtractor()), InterceptorOrder.FIRST);
         }
       };
+    }
+
+  }
+
+  @Configuration
+  @ConditionalOnProperty(prefix = "spring.datasource", name = "driverClassName", havingValue = "com.mysql.jdbc.Driver")
+  protected static class MySqlTraceAutoConfiguration {
+
+    //mysql
+    @Bean
+    @ConditionalOnClass(com.mysql.jdbc.Driver.class)
+    public MySqlTracerInit mySqlTracerInit() {
+      return new MySqlTracerInit();
     }
 
   }
