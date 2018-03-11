@@ -1,5 +1,6 @@
 package com.itiancai.trpc.examples.normal;
 
+import com.itiancai.trpc.core.grpc.annotation.ClientDefinition;
 import com.itiancai.trpc.core.grpc.client.GrpcClientStrategy;
 import com.itiancai.trpc.examples.model.HelloReply;
 import com.itiancai.trpc.examples.model.HelloRequest;
@@ -16,7 +17,11 @@ public class TrpcClient {
     ManagedChannel channel = ManagedChannelBuilder.forAddress("192.168.101.138", 9090)
             .usePlaintext(true)
             .build();
-    GrpcClientStrategy gcs = new GrpcClientStrategy(HelloService.class, channel);
+    ClientDefinition clientDefinition = new ClientDefinition(
+            "test", HelloService.class, 0, new String[]{}, true,
+            false, new String[]{}, 5000
+    );
+    GrpcClientStrategy gcs = new GrpcClientStrategy(channel, clientDefinition);
     HelloService helloService = (HelloService) gcs.getGrpcClient();
 
     HelloRequest request = new HelloRequest();
