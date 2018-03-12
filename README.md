@@ -198,15 +198,15 @@ public interface Registry {
 
 ## spring-support
 
- * TrpcServer声明周期管理
+ * TrpcServer生命周期管理
  * TrpcClient依赖注入
  * 自定义Interceptor
+ * ConsulRegistry实现
 
 ## 分布式追踪(sleuth zipkin)
 
  * grpc trce
  * mysql trace
- * 
  
 ## 限流 
  

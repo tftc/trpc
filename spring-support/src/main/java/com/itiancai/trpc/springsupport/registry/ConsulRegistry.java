@@ -4,11 +4,15 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.health.model.Check;
+import com.ecwid.consul.v1.health.model.HealthService;
 import com.itiancai.trpc.core.registry.NotifyServiceListener;
 import com.itiancai.trpc.core.registry.Registry;
 import com.itiancai.trpc.core.registry.ServiceAddress;
 import com.itiancai.trpc.core.utils.GrpcUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -26,6 +30,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 public class ConsulRegistry implements Registry {
+
+  private final static Logger logger = LoggerFactory.getLogger(ConsulRegistry.class);
 
   @Autowired
   private ConsulClient consulClient;
@@ -74,6 +80,8 @@ public class ConsulRegistry implements Registry {
   @Override
   public Set<ServiceAddress> discover(String group) {
 
+    clearUnPassingService(group);
+
     Set<ServiceAddress> addressSet = Sets.newHashSet();
     List<ServiceInstance> serviceInstanceList = discoveryClient.getInstances(group);
     for (ServiceInstance serviceInstance : serviceInstanceList) {
@@ -93,14 +101,39 @@ public class ConsulRegistry implements Registry {
 
   @EventListener(HeartbeatEvent.class)
   public void heartbeat(HeartbeatEvent event) {
+
     if(monitor.update(event.getValue())) {
       for(String group : subscribed.keySet()) {
+
         Set<ServiceAddress> addressSet = discover(group);
         for (NotifyServiceListener listener : subscribed.get(group)) {
           listener.notify(addressSet);
         }
       }
     }
+  }
+
+  /**
+   * 清理无用的服务
+   * @param id
+   */
+  private void clearUnPassingService(String id) {
+    try {
+      List<HealthService> response = consulClient.getHealthServices(id, false, null).getValue();
+      for (HealthService service : response) {
+        // 创建一个用来剔除无效实例的ConsulClient，连接到无效实例注册的agent
+        ConsulClient clearClient = new ConsulClient(service.getNode().getAddress(), 8500);
+        service.getChecks().forEach(check -> {
+          if (check.getStatus() != Check.CheckStatus.PASSING) {
+            logger.info("unregister group:{}, serviceID:{}", id, check.getServiceId());
+            clearClient.agentServiceDeregister(check.getServiceId());
+          }
+        });
+      }
+    } catch (Throwable t) {
+      logger.warn("agentServiceDeregister error, group:"+id, t);
+    }
+
   }
 
 }

@@ -10,6 +10,7 @@ spring:
     consul:
       host: localhost
       port: 8500
+      enabled: true
       discovery:
         register: false
         instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
@@ -32,6 +33,11 @@ spring:
       maxPoolPreparedStatementPerConnectionSize: 20
       filters: stat,wall,log4j
       connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+
+management:
+  health:
+    consul:
+      enabled: false
 
 server:
   port: 0
