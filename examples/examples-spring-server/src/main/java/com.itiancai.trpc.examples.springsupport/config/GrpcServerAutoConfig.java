@@ -1,9 +1,12 @@
 package com.itiancai.trpc.examples.springsupport.config;
 
+import com.ctrip.framework.apollo.spring.annotation.EnableApolloConfig;
+
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -22,9 +25,13 @@ import javax.sql.DataSource;
         transactionManagerRef = "transactionManager"
 )
 @EnableTransactionManagement(proxyTargetClass = true)
+@EnableApolloConfig
 @Configuration
 public class GrpcServerAutoConfig extends SingleDataSourceConfig implements TransactionManagementConfigurer {
-  @Bean
+
+
+  @RefreshScope
+  @Bean(name = "datasource")
   public DataSource datasource() {
     try {
       return createDataSource();

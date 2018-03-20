@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationProperties;
 import org.springframework.cloud.consul.ConditionalOnConsulEnabled;
 import org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties;
 import org.springframework.cloud.consul.discovery.HeartbeatProperties;
@@ -39,11 +40,15 @@ public class TrpcAutoConfiguration {
   public static class ConsulAutoConfiguration {
 
     @Bean
+    @ConditionalOnClass(AutoServiceRegistrationProperties.class)
     @ConditionalOnMissingBean
-    public ConsulAutoRegistration consulRegistration(ConsulDiscoveryProperties properties,
-                                                     ApplicationContext applicationContext,
-                                                     HeartbeatProperties heartbeatProperties) {
-      return ConsulAutoRegistration.registration(properties, applicationContext, null, heartbeatProperties);
+    public ConsulAutoRegistration consulRegistration(
+            AutoServiceRegistrationProperties autoServiceRegistrationProperties,
+            ConsulDiscoveryProperties properties,
+            ApplicationContext applicationContext,
+            HeartbeatProperties heartbeatProperties
+    ) {
+      return ConsulAutoRegistration.registration(autoServiceRegistrationProperties, properties, applicationContext, null, heartbeatProperties);
     }
 
     @Bean
