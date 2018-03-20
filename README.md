@@ -201,16 +201,62 @@ public interface Registry {
  * TrpcServer生命周期管理
  * TrpcClient依赖注入
  * 自定义Interceptor
- * ConsulRegistry实现
+ * ConsulRegistry、ZookeeperRegistry实现
 
 ## 分布式追踪(sleuth zipkin)
 
  * grpc trce
+    > grpc interceptor实现
  * mysql trace
+    > jdbc:mysql://xxx?statementInterceptors=com.itiancai.trpc.trace.mysql.TracingStatementInterceptor
+     ```java
+    public class TracingStatementInterceptor implements StatementInterceptorV2 {
+    
+      private final static Logger logger = LoggerFactory.getLogger(TracingStatementInterceptor.class);
+    
+      private static Tracer tracer;
+    
+      public static void setTracer(Tracer tracer) {
+        TracingStatementInterceptor.tracer = tracer;
+      }
+    
+      @Override
+      public ResultSetInternalMethods preProcess(String sql, Statement interceptedStatement,
+                                                 Connection connection) throws SQLException {
+        if(tracer == null) return null;
+        String spanName = SpanUtils.mysqlSpanName(connection);
+        Span span = tracer.createSpan(spanName);
+        if (interceptedStatement instanceof PreparedStatement) {
+          sql = ((PreparedStatement) interceptedStatement).getPreparedSql();
+        }
+        span.logEvent(Span.CLIENT_SEND);
+        span.tag("sql.query", sql);
+        return null;
+      }
+    
+      @Override
+      public ResultSetInternalMethods postProcess(String sql, Statement interceptedStatement,
+          ResultSetInternalMethods originalResultSet, Connection connection, int warningCount,
+          boolean noIndexUsed, boolean noGoodIndexUsed, SQLException statementException)
+          throws SQLException {
+        if(tracer == null) return null;
+        Span span = tracer.getCurrentSpan();
+        if (span == null) return null;
+    
+        if (statementException != null) {
+          span.tag("error", Integer.toString(statementException.getErrorCode()));
+        }
+        span.logEvent(Span.CLIENT_RECV);
+        tracer.close(span);
+        return null;
+      }
+    }
+    ```
  
 ## 限流 
  
  * grpc限流  
+     > 令牌桶算法；支持调用次数、耗时限制
 
 ## 配置中心
     
