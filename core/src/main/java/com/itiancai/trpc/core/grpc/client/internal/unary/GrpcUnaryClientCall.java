@@ -19,12 +19,12 @@ public interface GrpcUnaryClientCall<Req, Resp> {
                   new WeakHashMap<MethodDescriptor, FailOverUnaryFuture>()
           );
 
-  public  ListenableFuture<Resp> unaryFuture(Req request,
+  ListenableFuture<Resp> unaryFuture(Req request,
                                                MethodDescriptor<Req, Resp> method);
 
-  public Resp blockingUnaryResult(Req request, MethodDescriptor<Req, Resp> method);
+  Resp blockingUnaryResult(Req request, MethodDescriptor<Req, Resp> method);
 
-  public static <Req, Resp> GrpcUnaryClientCall create(final Channel channel, final Integer retryOptions) {
+  static <Req, Resp> GrpcUnaryClientCall create(final Channel channel, final Integer maxRetries) {
     final CallOptions callOptions = CallOptions.DEFAULT;
     return new GrpcUnaryClientCall<Req, Resp>() {
 
@@ -42,7 +42,7 @@ public interface GrpcUnaryClientCall<Req, Resp> {
       public ListenableFuture<Resp> unaryFuture(Req request, MethodDescriptor<Req, Resp> method) {
         FailOverUnaryFuture<Req, Resp> retryCallListener = newFailOverUnaryFuture(method);
         retryCallListener.setRequest(request);
-        retryCallListener.setMaxRetries(retryOptions);
+        retryCallListener.setMaxRetries(maxRetries);
         retryCallListener.setChannel(channel);
         retryCallListener.setCallOptions(callOptions);
         retryCallListener.run();
@@ -53,7 +53,7 @@ public interface GrpcUnaryClientCall<Req, Resp> {
       public Resp blockingUnaryResult(Req request, MethodDescriptor<Req, Resp> method) {
         FailOverUnaryFuture<Req, Resp> retryCallListener = newFailOverUnaryFuture(method);
         retryCallListener.setRequest(request);
-        retryCallListener.setMaxRetries(retryOptions);
+        retryCallListener.setMaxRetries(maxRetries);
         retryCallListener.setChannel(channel);
         retryCallListener.setCallOptions(callOptions);
         try {

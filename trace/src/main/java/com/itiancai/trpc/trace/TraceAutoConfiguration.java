@@ -57,12 +57,11 @@ public class TraceAutoConfiguration {
   }
 
   @Configuration
-  @ConditionalOnProperty(prefix = "spring.datasource", name = "driverClassName", havingValue = "com.mysql.jdbc.Driver")
+  @ConditionalOnClass(com.mysql.jdbc.Driver.class)
   protected static class MySqlTraceAutoConfiguration {
 
     //mysql
     @Bean
-    @ConditionalOnClass(com.mysql.jdbc.Driver.class)
     public MySqlTracerInit mySqlTracerInit() {
       return new MySqlTracerInit();
     }

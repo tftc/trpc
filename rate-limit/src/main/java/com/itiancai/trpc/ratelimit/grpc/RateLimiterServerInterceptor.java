@@ -1,11 +1,9 @@
 package com.itiancai.trpc.ratelimit.grpc;
 
-import com.itiancai.trpc.ratelimit.core.generator.RateLimitKeyGenerator;
 import com.itiancai.trpc.ratelimit.config.RateLimitProperties;
+import com.itiancai.trpc.ratelimit.core.generator.RateLimitKeyGenerator;
 import com.itiancai.trpc.ratelimit.core.repository.RateLimiter;
 import com.itiancai.trpc.ratelimit.core.repository.model.Rate;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
@@ -35,13 +33,13 @@ public class RateLimiterServerInterceptor implements ServerInterceptor {
   @Override
   public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
     final long start = System.currentTimeMillis();
-    String methodName = call.getMethodDescriptor().getFullMethodName();
+    GrpcCondition condition = new GrpcCondition(call.getMethodDescriptor(), properties);
     log.debug("RateLimiterServerInterceptor start ...");
-    Optional<Policy> policy_o = properties.getPolicy(methodName);
+    Optional<Policy> policy_o = condition.getPolicy();
     final boolean limitFlag = policy_o.isPresent();
     if (limitFlag) {
       Policy policy = policy_o.get();
-      final String key = rateLimitKeyGenerator.key(new GrpcCondition(policy, methodName));
+      final String key = rateLimitKeyGenerator.key(condition);
       final Rate rate = rateLimiter.consume(policy, key, null);
 
       final Long limit = policy.getLimit();
@@ -64,7 +62,7 @@ public class RateLimiterServerInterceptor implements ServerInterceptor {
         try {
           if(limitFlag) {
             Policy policy = policy_o.get();
-            final String key = rateLimitKeyGenerator.key(new GrpcCondition(policy, methodName));
+            final String key = rateLimitKeyGenerator.key(condition);
             final long requestTime = System.currentTimeMillis() - start;
             rateLimiter.consume(policy, key, requestTime);
           }

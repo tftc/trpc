@@ -17,7 +17,7 @@ import io.grpc.Status;
 import io.grpc.internal.GrpcUtil;
 
 public class FailOverUnaryFuture<Request, Response> extends ClientCall.Listener<Response>
-    implements Runnable {
+        implements Runnable {
 
   private final static Logger logger = LoggerFactory.getLogger(FailOverUnaryFuture.class);
 
@@ -62,8 +62,10 @@ public class FailOverUnaryFuture<Request, Response> extends ClientCall.Listener<
   @Override
   public void onMessage(Response message) {
     if (this.response != null && !enabledRetry) {
-      throw Status.INTERNAL.withDescription("More than one value received for unary call")
-          .asRuntimeException();
+      logger.error("More than one value received for unary call");
+      throw Status.INTERNAL
+              .withDescription("More than one value received for unary call")
+              .asRuntimeException();
     }
     this.response = message;
   }
@@ -80,8 +82,10 @@ public class FailOverUnaryFuture<Request, Response> extends ClientCall.Listener<
 
   private void statusOk(Metadata trailers) {
     if (response == null) {
-      completionFuture.setException(Status.INTERNAL
-              .withDescription("No value received for unary call").asRuntimeException(trailers));
+      completionFuture.setException(Status.INTERNAL.
+              withDescription("No value received for unary call")
+              .asRuntimeException(trailers)
+      );
     }
     completionFuture.set(response);
   }
@@ -104,7 +108,6 @@ public class FailOverUnaryFuture<Request, Response> extends ClientCall.Listener<
 
   /**
    * 重试次数验证
-   * @return
    */
   private boolean retryHaveDone() {
     return currentRetries.get() >= maxRetries;
