@@ -3,7 +3,9 @@ package com.itiancai.trpc.ratelimit.grpc;
 import com.itiancai.trpc.ratelimit.config.RateLimitProperties;
 import com.itiancai.trpc.ratelimit.core.generator.RateLimitKeyGenerator;
 import com.itiancai.trpc.ratelimit.core.repository.RateLimiter;
-import com.itiancai.trpc.ratelimit.core.repository.model.Rate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -13,12 +15,12 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
-import lombok.extern.slf4j.Slf4j;
 
 import static com.itiancai.trpc.ratelimit.config.RateLimitProperties.Policy;
 
-@Slf4j
 public class RateLimiterServerInterceptor implements ServerInterceptor {
+
+  private final static Logger log = LoggerFactory.getLogger(RateLimiterServerInterceptor.class);
 
   RateLimitKeyGenerator rateLimitKeyGenerator;
   RateLimiter rateLimiter;
@@ -40,15 +42,7 @@ public class RateLimiterServerInterceptor implements ServerInterceptor {
     if (limitFlag) {
       Policy policy = policy_o.get();
       final String key = rateLimitKeyGenerator.key(condition);
-      final Rate rate = rateLimiter.consume(policy, key, null);
-
-      final Long limit = policy.getLimit();
-      final Long remaining = rate.getRemaining();
-
-      final Long quota = policy.getQuota();
-      final Long remainingQuota = rate.getRemainingQuota();
-
-      if ((limit != null && remaining < 0) || (quota != null && remainingQuota < 0)) {
+      if (!rateLimiter.tryAcquire(policy, key)) {
         call.close(Status.UNAVAILABLE
                 .withCause(new RuntimeException("ratelimit close"))
                 .withDescription("ratelimit close"), headers);
@@ -61,10 +55,9 @@ public class RateLimiterServerInterceptor implements ServerInterceptor {
       public void close(Status status, Metadata trailers) {
         try {
           if(limitFlag) {
-            Policy policy = policy_o.get();
             final String key = rateLimitKeyGenerator.key(condition);
             final long requestTime = System.currentTimeMillis() - start;
-            rateLimiter.consume(policy, key, requestTime);
+            rateLimiter.consume(key, requestTime);
           }
           super.close(status, trailers);
         } catch (Throwable t) {

@@ -6,12 +6,13 @@ import com.itiancai.trpc.ratelimit.core.generator.RateLimitKeyGenerator;
 
 import java.util.StringJoiner;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
 public class GrpcRateLimitKeyGenerator implements RateLimitKeyGenerator {
 
   private final RateLimitProperties properties;
+
+  public GrpcRateLimitKeyGenerator(RateLimitProperties properties) {
+    this.properties = properties;
+  }
 
   @Override
   public String key(RateLimitCondition condition) {
